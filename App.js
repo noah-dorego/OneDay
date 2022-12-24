@@ -1,10 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, Touchable, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView, Touchable, TouchableOpacity, Alert, Modal } from 'react-native';
 import { IconButton } from '@react-native-material/core';
+import Dialog from "react-native-dialog";
 import Icon from "@expo/vector-icons/Feather";
 
 export default function App() {
+  const [currentTime, setCurrentTime] = useState("12:00");
+  const [addDialogVisible, setAddDialogVisible] = useState(false);
+  const [eventTitle, setEventTitle] = useState(" ");
+
   const [times, setTimes] = useState([
     { time: "12:00", event: " " },
     { time: "1:00", event: " " },
@@ -22,21 +27,36 @@ export default function App() {
 
   function deleteEvents() {
     return Alert.alert("Delete all events?", "You cannot undo this action.", [
-      { text: "Yes", onPress: () => console.log("Delete") },
-      { text: "No", onPress: () => console.log("Don't Delete") },
+      { text: "Yes", onPress: () => clearEvents() },
+      { text: "No", onPress: () => console.log("Cancelled event deletion.") },
     ]);
   }
 
-  function addEvent(time) {
+  function clearEvents() {
+    const newTimes = times.map((item) => {
+      return { time: item.time, event: " " };
+    });
+    setTimes(newTimes);
+    console.log("Deleted events.");
+  }
+
+  function addEvent(time, newEvent) {
+    setAddDialogVisible(false);
     const newTimes = times.map((item) => {
       if (item.time === time) {
-        return { time: item.time, event: "Event" };
+        return { time: item.time, event: newEvent };
       } else {
         return { time: item.time, event: item.event };
       }
     });
     setTimes(newTimes);
     console.log("add event " + time);
+  }
+
+  function confirmAddEvent(time) {
+    console.log("dialog");
+    setCurrentTime(time);
+    setAddDialogVisible(true);
   }
 
   return (
@@ -51,7 +71,7 @@ export default function App() {
         {times.map((item, i) => {
           return (
             <View key={i}>
-              <TouchableOpacity onPress={() => addEvent(item.time)} style={styles.slotContainer} key={item.time}>
+              <TouchableOpacity onPressOut={() => confirmAddEvent(item.time)} style={styles.slotContainer} key={item.time}>
                 <Text style={styles.timeSlotText}>{item.time}</Text>
               </TouchableOpacity>
               <View style={styles.emptyEventContainer} key={item + " event"}>
@@ -61,6 +81,16 @@ export default function App() {
           )
         })}
       </ScrollView>
+
+      <Dialog.Container visible={addDialogVisible}>
+        <Dialog.Title>Add Event</Dialog.Title>
+        <Dialog.Description>
+          Enter your title below.
+        </Dialog.Description>
+        <Dialog.Input value={eventTitle} onChangeText={setEventTitle}></Dialog.Input>
+        <Dialog.Button label="Add" onPress={() => addEvent(currentTime, eventTitle)} />
+        <Dialog.Button label="Cancel" onPress={() => setAddDialogVisible(false)} />
+      </Dialog.Container>
 
       <StatusBar style="auto" />
     </SafeAreaView>
