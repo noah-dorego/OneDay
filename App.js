@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   textInput: {
-    height: "wrap-content",
+    height: "auto",
     margin: 12,
     borderWidth: 1,
     padding: 18,
