@@ -1,78 +1,128 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Alert, Modal, TextInput, Dimensions } from 'react-native';
 import { IconButton } from '@react-native-material/core';
+import ModalNew from "react-native-modal";
 import Dialog from "react-native-dialog";
 import SelectDropdown from 'react-native-select-dropdown'
+import ColorPicker from 'react-native-wheel-color-picker'
 import Icon from "@expo/vector-icons/Feather";
 
 export default function App() {
+
+  // Vars
+  const EMPTY_EVENT_PLACEHOLDER = "     ";
+  //const times = ["12:00", "1:00", "2:00", "3:00", "4:00", "5:00", "6:00", "7:00", "8:00", "9:00", "10:00", "11:00"];
+  const deviceWidth = Dimensions.get("window").width;
+  const deviceHeight =
+    Platform.OS === "ios"
+      ? Dimensions.get("window").height
+      : require("react-native-extra-dimensions-android").get(
+        "REAL_WINDOW_HEIGHT"
+      );
+
+  // Custom event params
   const [currentTime, setCurrentTime] = useState("12:00");
+  const [eventStartTime, setEventStartTime] = useState("12:00");
   const [eventTitle, setEventTitle] = useState(" ");
+  const [eventColor, setEventColor] = useState('');
 
   const [addDialogVisible, setAddDialogVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
 
-  const [times, setTimes] = useState([
-    { time: "12:00", event: " " },
-    { time: "1:00", event: " " },
-    { time: "2:00", event: " " },
-    { time: "3:00", event: " " },
-    { time: "4:00", event: " " },
-    { time: "5:00", event: " " },
-    { time: "6:00", event: " " },
-    { time: "7:00", event: " " },
-    { time: "8:00", event: " " },
-    { time: "9:00", event: " " },
-    { time: "10:00", event: " " },
-    { time: "11:00", event: " " },
+  const [events, setEvents] = useState([
+    { time: "12:00", event: " ", color: colors.grey },
+    { time: "1:00", event: " ", color: colors.grey },
+    { time: "2:00", event: " ", color: colors.grey },
+    { time: "3:00", event: " ", color: colors.grey },
+    { time: "4:00", event: " ", color: colors.grey },
+    { time: "5:00", event: " ", color: colors.grey },
+    { time: "6:00", event: " ", color: colors.grey },
+    { time: "7:00", event: " ", color: colors.grey },
+    { time: "8:00", event: " ", color: colors.grey },
+    { time: "9:00", event: " ", color: colors.grey },
+    { time: "10:00", event: " ", color: colors.grey },
+    { time: "11:00", event: " ", color: colors.grey },
   ]);
 
-  function deleteEvents() {
+  const onColorChange = eventColor => {
+    setEventColor(eventColor);
+  };
+
+  const deleteEvents = () => {
     return Alert.alert("Delete all events?", "You cannot undo this action.", [
       { text: "Yes", onPress: () => clearEvents() },
       { text: "No", onPress: () => console.log("Cancelled event deletion.") },
     ]);
   }
 
-  function clearEvents() {
-    const newTimes = times.map((item) => {
-      return { time: item.time, event: " " };
+  const clearEvents = () => {
+    const newEvents = events.map((item) => {
+      return { time: item.time, event: " ", color: colors.grey };
     });
-    setTimes(newTimes);
+    setEvents(newEvents);
     console.log("Deleted events.");
   }
 
-  function addEvent(time, newEvent) {
+  const addEvent = (time, newEvent) => {
     setAddDialogVisible(false);
-    const newTimes = times.map((item) => {
+    if (newEvent === "") {
+      newEvent = " ";
+    }
+    const newEvents = events.map((item) => {
       if (item.time === time) {
-        return { time: item.time, event: newEvent };
+        return { time: item.time, event: newEvent, color: colors.grey };
       } else {
-        return { time: item.time, event: item.event };
+        return { time: item.time, event: item.event, color: item.color };
       }
     });
-    setTimes(newTimes);
+    setEvents(newEvents);
     console.log("add event " + time);
   }
 
-  function confirmAddEvent(time) {
+  const addCustomEvent = (time, newEvent, customColor) => {
+    setAddModalVisible(false);
+    if (newEvent === "") {
+      newEvent = " ";
+    }
+    const newEvents = events.map((item) => {
+      if (item.time === time) {
+        return { time: item.time, event: newEvent, color: { backgroundColor: customColor } };
+      } else {
+        return { time: item.time, event: item.event, color: item.color };
+      }
+    });
+    setEvents(newEvents);
+    console.log("add event " + time);
+  }
+
+  const confirmAddEvent = (time) => {
     console.log("dialog");
     setCurrentTime(time);
     setAddDialogVisible(true);
   }
 
-  function removeEvent(time) {
+  const removeEvent = (time) => {
     setAddDialogVisible(false);
-    const newTimes = times.map((item) => {
+    const newEvents = events.map((item) => {
       if (item.time === time) {
-        return { time: item.time, event: " " };
+        return { time: item.time, event: " ", color: item.color };
       } else {
-        return { time: item.time, event: item.event };
+        return { time: item.time, event: item.event, color: item.color };
       }
     });
-    setTimes(newTimes);
-    console.log("add event " + time);
+    setEvents(newEvents);
+    console.log("remove event " + time);
+  }
+
+  const eventSelected = (time, event) => {
+    if (event === " ") {
+      confirmAddEvent(time);
+    } else {
+      removeEvent(time);
+    }
   }
 
   return (
@@ -81,17 +131,19 @@ export default function App() {
         <Text style={styles.titleText}>OneDay</Text>
         <IconButton icon={props => <Icon name="plus" size={24} color="white" />} style={[styles.addIcon, colors.green]} onPress={() => setAddModalVisible(true)} />
         <IconButton icon={props => <Icon name="trash-2" size={20} color="white" />} style={[styles.deleteIcon, colors.red]} onPress={deleteEvents} />
+        <IconButton icon={props => <Icon name="settings" size={20} color="white" />} style={[styles.settingsIcon, colors.grey]} onPress={() => setSettingsModalVisible(true)} />
+        <IconButton icon={props => <Icon name="menu" size={20} color="white" />} style={[styles.detailsIcon, colors.grey]} onPress={() => setDetailsModalVisible(true)} />
       </View>
 
       <ScrollView>
-        {times.map((item, i) => {
+        {events.map((item, i) => {
           return (
             <View key={i}>
-              <TouchableOpacity onPressOut={() => confirmAddEvent(item.time)} style={styles.slotContainer} key={item.time}>
+              <TouchableOpacity onLongPress={() => confirmAddEvent(item.time)} style={styles.slotContainer} key={item.time}>
                 <Text style={styles.timeSlotText}>{item.time}</Text>
               </TouchableOpacity>
-              <View style={styles.emptyEventContainer} key={item + " event"}>
-                <Text style={styles.timeSlotText} onLongPress={() => removeEvent(item.time)}>{item.event}</Text>
+              <View style={[styles.emptyEventContainer, item.color]} key={item + " event"}>
+                <Text style={styles.timeSlotText} onLongPress={() => eventSelected(item.time, item.event)}>{item.event}</Text>
               </View>
             </View>
           )
@@ -108,14 +160,11 @@ export default function App() {
         <Dialog.Button label="Cancel" onPress={() => setAddDialogVisible(false)} />
       </Dialog.Container>
 
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={addModalVisible}
-        onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
-          setModalVisible(!modalVisible);
-        }}
+      <ModalNew
+        isVisible={addModalVisible}
+        deviceWidth={deviceWidth}
+        deviceHeight={deviceHeight}
+        style={styles.modalViewContainer}
       >
         <View style={[styles.modalView, colors.white]}>
           <Text style={styles.modalTitleText}>Add Event</Text>
@@ -130,9 +179,10 @@ export default function App() {
             buttonTextStyle={styles.whiteBodyText}
             defaultButtonText="Start Time"
             renderDropdownIcon={() => { return <Icon name="chevron-down" size={20} color="white" /> }}
-            data={times}
+            data={events}
             onSelect={(selectedItem, index) => {
-              console.log(selectedItem, index)
+              console.log(selectedItem);
+              setEventStartTime(selectedItem.time);
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
               // text represented after item is selected
@@ -150,9 +200,9 @@ export default function App() {
             buttonTextStyle={styles.whiteBodyText}
             defaultButtonText="End Time"
             renderDropdownIcon={() => { return <Icon name="chevron-down" size={20} color="white" /> }}
-            data={times}
+            data={events}
             onSelect={(selectedItem, index) => {
-              console.log(selectedItem, index)
+              //setEventStartTime(selectedItem.time);
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
               // text represented after item is selected
@@ -165,10 +215,22 @@ export default function App() {
               return item.time
             }}
           />
+          <View style={styles.colorPicker}>
+            <ColorPicker
+              color={eventColor}
+              onColorChange={(eventColor) => onColorChange(eventColor)}
+              thumbSize={30}
+              sliderSize={20}
+              swatches={true}
+              noSnap={true}
+              row={false}
+            />
+          </View>
+          <View style={[{ height: 200 }]} />
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.modalButton, colors.green]}
-              onPress={() => setAddModalVisible(!addModalVisible)}
+              onPress={() => addCustomEvent(eventStartTime, eventTitle, eventColor)}
             >
               <Text style={[styles.buttonText, colors.whiteText]}>Add</Text>
             </TouchableOpacity>
@@ -180,7 +242,33 @@ export default function App() {
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </ModalNew>
+
+      <ModalNew
+        isVisible={settingsModalVisible}
+        onBackdropPress={() => setSettingsModalVisible(false)}
+        deviceWidth={deviceWidth}
+        deviceHeight={deviceHeight}
+        style={styles.modalViewContainer}
+      >
+        <View style={[styles.modalView, colors.white]}>
+          <Text style={styles.modalTitleText}>Settings</Text>
+
+        </View>
+      </ModalNew>
+
+      <ModalNew
+        isVisible={detailsModalVisible}
+        onBackdropPress={() => setDetailsModalVisible(false)}
+        deviceWidth={deviceWidth}
+        deviceHeight={deviceHeight}
+        style={styles.modalViewContainer}
+      >
+        <View style={[styles.modalView, colors.white]}>
+          <Text style={styles.modalTitleText}>Details</Text>
+
+        </View>
+      </ModalNew>
 
       <StatusBar style="auto" />
     </SafeAreaView>
@@ -195,6 +283,12 @@ const colors = StyleSheet.create({
   white: { backgroundColor: "#fff" },
   whiteText: { color: "#fff" },
 });
+
+const margins = StyleSheet.create({
+  m10: { margin: 10 },
+  m12: { margin: 12 },
+  m20: { margin: 20 },
+})
 
 const styles = StyleSheet.create({
   mainContainer: {
@@ -224,7 +318,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignSelf: "flex-start",
     width: "70%",
-    backgroundColor: '#4f4f4f',
     borderTopRightRadius: 20,
     borderBottomRightRadius: 20,
     marginTop: 5,
@@ -233,12 +326,12 @@ const styles = StyleSheet.create({
   },
   modalView: {
     alignItems: "center",
-    justifyContent: "center",
-    margin: 20,
-    marginTop: "50%",
+    margin: 10,
+    flex: "auto",
+    flexDirection: "column",
+    marginTop: "12%",
     borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
+    padding: 15,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -247,6 +340,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  modalViewContainer: {
+    flex: 1,
+    flexDirection: "column",
   },
   modalButton: {
     width: 100,
@@ -261,18 +358,21 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     flexDirection: 'row',
     marginTop: 20,
-    marginBottom: 40,
+    marginBottom: 60,
+  },
+  colorPicker: {
+    height: 80,
   },
   textInput: {
     height: "auto",
-    margin: 12,
+    margin: 10,
     borderWidth: 1,
-    padding: 18,
+    padding: 10,
     borderRadius: 20,
     width: "90%",
   },
   timeDropdown: {
-    margin: 12,
+    margin: 5,
     borderRadius: 20,
     backgroundColor: "#4f4f4f",
   },
@@ -283,7 +383,7 @@ const styles = StyleSheet.create({
   },
   modalTitleText: {
     fontSize: 24,
-    margin: 12,
+    margin: 10,
     fontWeight: 'bold',
     color: '#000',
   },
@@ -301,6 +401,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
+  settingsIcon: {
+    width: 30,
+    height: 30,
+    position: "absolute",
+    alignSelf: "flex-start",
+    left: 20,
+  },
+  detailsIcon: {
+    width: 30,
+    height: 30,
+    position: "absolute",
+    alignSelf: "flex-start",
+    left: 75,
+  },
   addIcon: {
     width: 30,
     height: 30,
@@ -312,7 +426,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     position: "absolute",
-    alignSelf: "flex-start",
-    left: 20,
+    alignSelf: "flex-end",
+    right: 75,
   },
 });

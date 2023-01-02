@@ -16,7 +16,10 @@
     "react": "18.1.0",
     "react-native": "0.70.5",
     "react-native-dialog": "^9.3.0",
-    "react-native-select-dropdown": "^3.1.0"
+    "react-native-extra-dimensions-android": "^1.2.5",
+    "react-native-modal": "^13.0.1",
+    "react-native-select-dropdown": "^3.1.0",
+    "react-native-wheel-color-picker": "^1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"
