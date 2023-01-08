@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Alert, Modal, TextInput, Dimensions } from 'react-native';
-import { IconButton } from '@react-native-material/core';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Alert, Linking, TextInput, Dimensions } from 'react-native';
+import { IconButton, Switch } from '@react-native-material/core';
 import ModalNew from "react-native-modal";
 import Dialog from "react-native-dialog";
 import SelectDropdown from 'react-native-select-dropdown'
@@ -21,16 +21,24 @@ export default function App() {
         "REAL_WINDOW_HEIGHT"
       );
 
+  const linkedinURL = "https://www.linkedin.com/in/noah-do-rego/";
+  const githubURL = "https://github.com/NoahdoRegoUO";
+
   // Custom event params
   const [currentTime, setCurrentTime] = useState("12:00");
   const [eventStartTime, setEventStartTime] = useState("12:00");
   const [eventTitle, setEventTitle] = useState(" ");
   const [eventColor, setEventColor] = useState('');
 
+  // Modal/dialog params
   const [addDialogVisible, setAddDialogVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+
+  // Settings params
+  const [notifications, setNotifications] = useState(false);
+  const [lightMode, setLightMode] = useState(false);
 
   const [events, setEvents] = useState([
     { time: "12:00", event: " ", color: colors.grey },
@@ -244,7 +252,7 @@ export default function App() {
         </View>
       </ModalNew>
 
-      <ModalNew
+      <ModalNew // *** Settings Modal ***
         isVisible={settingsModalVisible}
         onBackdropPress={() => setSettingsModalVisible(false)}
         deviceWidth={deviceWidth}
@@ -253,11 +261,99 @@ export default function App() {
       >
         <View style={[styles.modalView, colors.white]}>
           <Text style={styles.modalTitleText}>Settings</Text>
-
+          <View style={styles.settingsContainer}>
+            <Text style={styles.settingText}>Notifications</Text>
+            <Switch
+              style={styles.settingsSwitch}
+              trackColor={{ false: colors.lightGrey, true: colors.green }}
+              thumbColor={"#f4f3f4"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={setNotifications}
+              value={notifications}
+            />
+          </View>
+          <View style={styles.settingsContainer}>
+            <Text style={styles.settingText}>Light Mode</Text>
+            <Switch
+              style={styles.settingsSwitch}
+              trackColor={{ false: colors.lightGrey, true: colors.green }}
+              thumbColor={"#f4f3f4"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={setLightMode}
+              value={lightMode}
+            />
+          </View>
+          <View style={styles.settingsContainer}>
+            <Text style={styles.settingText}>Clock Type</Text>
+            <View style={styles.buttonContainerSecondary}>
+              <TouchableOpacity
+                style={[styles.clock12HourButton, colors.green]}
+                onPress={() => console.log("Set to 12 hour clock")}
+              >
+                <Text style={[styles.buttonText, colors.whiteText]}>12 Hour</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.clock24HourButton, colors.green]}
+                onPress={() => console.log("Set to 24 hour clock")}
+              >
+                <Text style={[styles.buttonText, colors.whiteText]}>24 Hour</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.extraSpace} />
+          <SelectDropdown
+            buttonStyle={styles.timeDropdown}
+            buttonTextStyle={styles.whiteBodyText}
+            defaultButtonText="Day Start Time"
+            renderDropdownIcon={() => { return <Icon name="chevron-down" size={20} color="white" /> }}
+            data={events}
+            onSelect={(selectedItem, index) => {
+              console.log(selectedItem);
+              setEventStartTime(selectedItem.time);
+            }}
+            buttonTextAfterSelection={(selectedItem, index) => {
+              // text represented after item is selected
+              // if data array is an array of objects then return selectedItem.property to render after item is selected
+              return "Start Time: " + selectedItem.time
+            }}
+            rowTextForSelection={(item, index) => {
+              // text represented for each item in dropdown
+              // if data array is an array of objects then return item.property to represent item in dropdown
+              return item.time
+            }}
+          />
+          <SelectDropdown
+            buttonStyle={styles.timeDropdown}
+            buttonTextStyle={styles.whiteBodyText}
+            defaultButtonText="Day End Time"
+            renderDropdownIcon={() => { return <Icon name="chevron-down" size={20} color="white" /> }}
+            data={events}
+            onSelect={(selectedItem, index) => {
+              //setEventStartTime(selectedItem.time);
+            }}
+            buttonTextAfterSelection={(selectedItem, index) => {
+              // text represented after item is selected
+              // if data array is an array of objects then return selectedItem.property to render after item is selected
+              return "End Time: " + selectedItem.time
+            }}
+            rowTextForSelection={(item, index) => {
+              // text represented for each item in dropdown
+              // if data array is an array of objects then return item.property to represent item in dropdown
+              return item.time
+            }}
+          />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.modalButton, colors.grey]}
+              onPress={() => setSettingsModalVisible(false)}
+            >
+              <Text style={[styles.buttonText, colors.whiteText]}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ModalNew>
 
-      <ModalNew
+      <ModalNew // *** Details Modal ***
         isVisible={detailsModalVisible}
         onBackdropPress={() => setDetailsModalVisible(false)}
         deviceWidth={deviceWidth}
@@ -266,7 +362,35 @@ export default function App() {
       >
         <View style={[styles.modalView, colors.white]}>
           <Text style={styles.modalTitleText}>Details</Text>
-
+          <Text style={styles.normalText}>
+            OneDay is a simple scheduling app that can be used for planning your day, creating reminders and increasing your productivity.
+          </Text>
+          <Text style={styles.modalSubtitleText}>Controls</Text>
+          <Text style={styles.normalText}>
+            The buttons in the header are used for
+            accessing settings, opening details,
+            deleting all events and adding a custom
+            event, respectively.
+          </Text>
+          <Text style={styles.modalSubtitleText}>Quick Actions</Text>
+          <Text style={styles.normalText}>
+            To easily add a default event, hold a
+            time slot or an empty event slot. To
+            delete a single event, hold the event.
+          </Text>
+          <Text style={styles.normalText}>Created by Noah do Régo</Text>
+          <View style={styles.buttonContainer}>
+            <IconButton icon={props => <Icon name="github" size={24} color="white" />} style={[styles.githubIcon, colors.darkGrey]} onPress={async () => Linking.openURL(githubURL)} />
+            <IconButton icon={props => <Icon name="linkedin" size={24} color="white" />} style={[styles.linkedInIcon, colors.blue]} onPress={async () => Linking.openURL(linkedinURL)} />
+          </View>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.modalButton, colors.grey]}
+              onPress={() => setDetailsModalVisible(false)}
+            >
+              <Text style={[styles.buttonText, colors.whiteText]}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ModalNew>
 
@@ -276,9 +400,12 @@ export default function App() {
 }
 
 const colors = StyleSheet.create({
+  black: { backgroundColor: "#000" },
   darkGrey: { backgroundColor: "#212121" },
   grey: { backgroundColor: '#4f4f4f' },
+  lightGrey: { backgroundColor: '#767577' },
   green: { backgroundColor: "#47b356" },
+  blue: { backgroundColor: "#325ea8" },
   red: { backgroundColor: "#e85b51" },
   white: { backgroundColor: "#fff" },
   whiteText: { color: "#fff" },
@@ -353,12 +480,40 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     elevation: 2,
   },
+  clock12HourButton: {
+    width: 80,
+    height: 35,
+    borderRadius: 30,
+    padding: 10,
+    marginHorizontal: 5,
+    elevation: 2,
+  },
+  clock24HourButton: {
+    width: 80,
+    height: 35,
+    borderRadius: 30,
+    padding: 10,
+    marginLeft: 5,
+    elevation: 2,
+  },
   buttonContainer: {
     flex: 1,
     flexWrap: "wrap",
     flexDirection: 'row',
     marginTop: 20,
     marginBottom: 60,
+  },
+  buttonContainerSecondary: {
+    flex: 1,
+    flexWrap: "wrap",
+    flexDirection: 'row',
+    marginBottom: "4%",
+    position: "absolute",
+    alignSelf: "flex-end",
+  },
+  settingsContainer: {
+    width: "100%",
+    marginBottom: "4%",
   },
   colorPicker: {
     height: 80,
@@ -381,8 +536,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
+  normalText: {
+    fontSize: 16,
+    color: "#000",
+    margin: 5,
+  },
   modalTitleText: {
     fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  modalSubtitleText: {
+    fontSize: 20,
     margin: 10,
     fontWeight: 'bold',
     color: '#000',
@@ -400,6 +565,17 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#fff',
+  },
+  settingText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
+    marginTop: 5,
+    alignSelf: "flex-start",
+  },
+  settingsSwitch: {
+    alignSelf: "flex-end",
+    position: "absolute",
   },
   settingsIcon: {
     width: 30,
@@ -428,5 +604,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignSelf: "flex-end",
     right: 75,
+  },
+  linkedInIcon: {
+    width: 50,
+    height: 50,
+    marginHorizontal: 5,
+  },
+  githubIcon: {
+    width: 50,
+    height: 50,
+    marginHorizontal: 5,
+  },
+  extraSpace: {
+    marginVertical: "3%",
   },
 });
