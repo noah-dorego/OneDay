@@ -24,10 +24,13 @@ export default function App() {
   const linkedinURL = "https://www.linkedin.com/in/noah-do-rego/";
   const githubURL = "https://github.com/NoahdoRegoUO";
 
+  var currentHour = new Date().getHours() % 12;
+  var currentMin = new Date().getMinutes();
+
   // Custom event params
   const [currentTime, setCurrentTime] = useState("12:00");
   const [eventStartTime, setEventStartTime] = useState("12:00");
-  const [eventTitle, setEventTitle] = useState(" ");
+  const [eventTitle, setEventTitle] = useState(EMPTY_EVENT_PLACEHOLDER);
   const [eventColor, setEventColor] = useState('');
 
   // Modal/dialog params
@@ -41,18 +44,18 @@ export default function App() {
   const [lightMode, setLightMode] = useState(false);
 
   const [events, setEvents] = useState([
-    { time: "12:00", event: " ", color: colors.grey },
-    { time: "1:00", event: " ", color: colors.grey },
-    { time: "2:00", event: " ", color: colors.grey },
-    { time: "3:00", event: " ", color: colors.grey },
-    { time: "4:00", event: " ", color: colors.grey },
-    { time: "5:00", event: " ", color: colors.grey },
-    { time: "6:00", event: " ", color: colors.grey },
-    { time: "7:00", event: " ", color: colors.grey },
-    { time: "8:00", event: " ", color: colors.grey },
-    { time: "9:00", event: " ", color: colors.grey },
-    { time: "10:00", event: " ", color: colors.grey },
-    { time: "11:00", event: " ", color: colors.grey },
+    { time: "12:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "1:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "2:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "3:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "4:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "5:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "6:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "7:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "8:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "9:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "10:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "11:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
   ]);
 
   const onColorChange = eventColor => {
@@ -68,7 +71,7 @@ export default function App() {
 
   const clearEvents = () => {
     const newEvents = events.map((item) => {
-      return { time: item.time, event: " ", color: colors.grey };
+      return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
     });
     setEvents(newEvents);
     console.log("Deleted events.");
@@ -87,7 +90,7 @@ export default function App() {
       }
     });
     setEvents(newEvents);
-    console.log("add event " + time);
+    console.log("add event for" + time + " at time: " + currentHour + ":" + currentMin);
   }
 
   const addCustomEvent = (time, newEvent, customColor) => {
@@ -116,7 +119,7 @@ export default function App() {
     setAddDialogVisible(false);
     const newEvents = events.map((item) => {
       if (item.time === time) {
-        return { time: item.time, event: " ", color: item.color };
+        return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: item.color };
       } else {
         return { time: item.time, event: item.event, color: item.color };
       }
@@ -126,7 +129,7 @@ export default function App() {
   }
 
   const eventSelected = (time, event) => {
-    if (event === " ") {
+    if (event === EMPTY_EVENT_PLACEHOLDER || event === " ") {
       confirmAddEvent(time);
     } else {
       removeEvent(time);
