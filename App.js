@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Alert, Linking, TextInput, Dimensions } from 'react-native';
 import { IconButton, Switch } from '@react-native-material/core';
 import ModalNew from "react-native-modal";
@@ -7,6 +7,60 @@ import Dialog from "react-native-dialog";
 import SelectDropdown from 'react-native-select-dropdown'
 import ColorPicker from 'react-native-wheel-color-picker'
 import Icon from "@expo/vector-icons/Feather";
+
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
+async function schedulePushNotification() {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Event",
+      body: 'Here is the notification body',
+      data: { data: 'goes here' },
+    },
+    trigger: { seconds: 2 },
+  });
+}
+
+async function registerForPushNotificationsAsync() {
+  let token;
+
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
+  }
+
+  if (Device.isDevice) {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      alert('Failed to get push token for push notification!');
+      return;
+    }
+    token = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log(token);
+  } else {
+    alert('Must use physical device for Push Notifications');
+  }
+
+  return token;
+}
 
 export default function App() {
 
@@ -26,6 +80,11 @@ export default function App() {
 
   var currentHour = new Date().getHours() % 12;
   var currentMin = new Date().getMinutes();
+
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
 
   // Custom event params
   const [currentTime, setCurrentTime] = useState("12:00");
@@ -57,6 +116,23 @@ export default function App() {
     { time: "10:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
     { time: "11:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
   ]);
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener.current);
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
   const onColorChange = eventColor => {
     setEventColor(eventColor);
@@ -271,7 +347,10 @@ export default function App() {
               trackColor={{ false: colors.lightGrey, true: colors.green }}
               thumbColor={"#f4f3f4"}
               ios_backgroundColor="#3e3e3e"
-              onValueChange={setNotifications}
+              onValueChange={async () => {
+                await schedulePushNotification();
+                setNotifications();
+              }}
               value={notifications}
             />
           </View>
