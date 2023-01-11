@@ -65,7 +65,7 @@ async function registerForPushNotificationsAsync() {
 export default function App() {
 
   // Vars
-  const EMPTY_EVENT_PLACEHOLDER = "     ";
+  const EMPTY_EVENT_PLACEHOLDER = " ";
   //const times = ["12:00", "1:00", "2:00", "3:00", "4:00", "5:00", "6:00", "7:00", "8:00", "9:00", "10:00", "11:00"];
   const deviceWidth = Dimensions.get("window").width;
   const deviceHeight =
@@ -156,7 +156,7 @@ export default function App() {
   const addEvent = (time, newEvent) => {
     setAddDialogVisible(false);
     if (newEvent === "") {
-      newEvent = " ";
+      newEvent = EMPTY_EVENT_PLACEHOLDER;
     }
     const newEvents = events.map((item) => {
       if (item.time === time) {
@@ -172,7 +172,7 @@ export default function App() {
   const addCustomEvent = (time, newEvent, customColor) => {
     setAddModalVisible(false);
     if (newEvent === "") {
-      newEvent = " ";
+      newEvent = EMPTY_EVENT_PLACEHOLDER;
     }
     const newEvents = events.map((item) => {
       if (item.time === time) {
@@ -195,7 +195,7 @@ export default function App() {
     setAddDialogVisible(false);
     const newEvents = events.map((item) => {
       if (item.time === time) {
-        return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: item.color };
+        return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
       } else {
         return { time: item.time, event: item.event, color: item.color };
       }
@@ -205,7 +205,7 @@ export default function App() {
   }
 
   const eventSelected = (time, event) => {
-    if (event === EMPTY_EVENT_PLACEHOLDER || event === " ") {
+    if (event === EMPTY_EVENT_PLACEHOLDER) {
       confirmAddEvent(time);
     } else {
       removeEvent(time);
@@ -372,13 +372,30 @@ export default function App() {
                 style={[styles.clock12HourButton, colors.green]}
                 onPress={() => console.log("Set to 12 hour clock")}
               >
-                <Text style={[styles.buttonText, colors.whiteText]}>12 Hour</Text>
+                <Text style={[styles.buttonText, colors.whiteText]}>12 hour</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.clock24HourButton, colors.green]}
                 onPress={() => console.log("Set to 24 hour clock")}
               >
-                <Text style={[styles.buttonText, colors.whiteText]}>24 Hour</Text>
+                <Text style={[styles.buttonText, colors.whiteText]}>24 hour</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.settingsContainer}>
+            <Text style={styles.settingText}>Intervals</Text>
+            <View style={styles.buttonContainerSecondary}>
+              <TouchableOpacity
+                style={[styles.clock12HourButton, colors.green]}
+                onPress={() => console.log("Set to 1 hour intervals")}
+              >
+                <Text style={[styles.buttonText, colors.whiteText]}>1 hour</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.clock24HourButton, colors.green]}
+                onPress={() => console.log("Set to 30 minute intervals")}
+              >
+                <Text style={[styles.buttonText, colors.whiteText]}>30 min.</Text>
               </TouchableOpacity>
             </View>
           </View>
