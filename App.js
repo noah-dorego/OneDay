@@ -1,15 +1,22 @@
-import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Alert, Linking, TextInput, Dimensions } from 'react-native';
 import { IconButton, Switch } from '@react-native-material/core';
 import ModalNew from "react-native-modal";
 import Dialog from "react-native-dialog";
-import SelectDropdown from 'react-native-select-dropdown'
-import ColorPicker from 'react-native-wheel-color-picker'
+import SelectDropdown from 'react-native-select-dropdown';
+import ColorPicker from 'react-native-wheel-color-picker';
 import Icon from "@expo/vector-icons/Feather";
-
+import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+
+// styles
+import styles from 'app/styling/mainstyles';
+import colors from 'app/styling/colors';
+import margins from 'app/styling/margins';
+
+// Components
+import CircularMenuButton from "app/components/buttons/CircularMenuButton";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -218,7 +225,7 @@ export default function App() {
         <Text style={styles.titleText}>OneDay</Text>
         <IconButton icon={props => <Icon name="plus" size={24} color="white" />} style={[styles.addIcon, colors.green]} onPress={() => setAddModalVisible(true)} />
         <IconButton icon={props => <Icon name="trash-2" size={20} color="white" />} style={[styles.deleteIcon, colors.red]} onPress={deleteEvents} />
-        <IconButton icon={props => <Icon name="settings" size={20} color="white" />} style={[styles.settingsIcon, colors.grey]} onPress={() => setSettingsModalVisible(true)} />
+        <CircularMenuButton style={[styles.settingsIcon, colors.grey]} action={() => setSettingsModalVisible(true)} />
         <IconButton icon={props => <Icon name="menu" size={20} color="white" />} style={[styles.detailsIcon, colors.grey]} onPress={() => setDetailsModalVisible(true)} />
       </View>
 
@@ -497,224 +504,3 @@ export default function App() {
     </SafeAreaView>
   );
 }
-
-const colors = StyleSheet.create({
-  black: { backgroundColor: "#000" },
-  darkGrey: { backgroundColor: "#212121" },
-  grey: { backgroundColor: '#4f4f4f' },
-  lightGrey: { backgroundColor: '#767577' },
-  green: { backgroundColor: "#47b356" },
-  blue: { backgroundColor: "#325ea8" },
-  red: { backgroundColor: "#e85b51" },
-  white: { backgroundColor: "#fff" },
-  whiteText: { color: "#fff" },
-});
-
-const margins = StyleSheet.create({
-  m10: { margin: 10 },
-  m12: { margin: 12 },
-  m20: { margin: 20 },
-})
-
-const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    paddingTop: 20,
-    paddingHorizontal: 20,
-  },
-  titleContainer: {
-    alignItems: 'center',
-    justifyContent: "center",
-    marginBottom: 10,
-    marginTop: 5,
-  },
-  slotContainer: {
-    paddingHorizontal: 10,
-    alignSelf: "flex-start",
-    width: "25%",
-    backgroundColor: '#4f4f4f',
-    borderBottomLeftRadius: 20,
-    borderTopLeftRadius: 20,
-    marginTop: 5,
-    marginLeft: 5,
-    padding: 25,
-  },
-  emptyEventContainer: {
-    paddingHorizontal: 10,
-    position: "absolute",
-    alignSelf: "flex-start",
-    width: "70%",
-    borderTopRightRadius: 20,
-    borderBottomRightRadius: 20,
-    marginTop: 5,
-    marginLeft: "28%",
-    padding: 25,
-  },
-  modalView: {
-    alignItems: "center",
-    margin: 10,
-    flex: "auto",
-    flexDirection: "column",
-    marginTop: "12%",
-    borderRadius: 20,
-    padding: 15,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalViewContainer: {
-    flex: 1,
-    flexDirection: "column",
-  },
-  modalButton: {
-    width: 100,
-    height: 40,
-    borderRadius: 20,
-    padding: 10,
-    marginHorizontal: 5,
-    elevation: 2,
-  },
-  clock12HourButton: {
-    width: 80,
-    height: 35,
-    borderRadius: 30,
-    padding: 10,
-    marginHorizontal: 5,
-    elevation: 2,
-  },
-  clock24HourButton: {
-    width: 80,
-    height: 35,
-    borderRadius: 30,
-    padding: 10,
-    marginLeft: 5,
-    elevation: 2,
-  },
-  buttonContainer: {
-    flex: 1,
-    flexWrap: "wrap",
-    flexDirection: 'row',
-    marginTop: 20,
-    marginBottom: 60,
-  },
-  buttonContainerSecondary: {
-    flex: 1,
-    flexWrap: "wrap",
-    flexDirection: 'row',
-    marginBottom: "4%",
-    position: "absolute",
-    alignSelf: "flex-end",
-  },
-  settingsContainer: {
-    width: "100%",
-    marginBottom: "4%",
-  },
-  colorPicker: {
-    height: 80,
-  },
-  textInput: {
-    height: "auto",
-    margin: 10,
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 20,
-    width: "90%",
-  },
-  timeDropdown: {
-    margin: 5,
-    borderRadius: 20,
-    backgroundColor: "#4f4f4f",
-  },
-  titleText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  normalText: {
-    fontSize: 16,
-    color: "#000",
-    margin: 5,
-  },
-  modalTitleText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  modalSubtitleText: {
-    fontSize: 20,
-    margin: 10,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  whiteBodyText: {
-    fontWeight: "bold",
-    fontSize: 16,
-    color: "white",
-  },
-  buttonText: {
-    fontWeight: "bold",
-    textAlign: "center"
-  },
-  timeSlotText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  settingText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-    marginTop: 5,
-    alignSelf: "flex-start",
-  },
-  settingsSwitch: {
-    alignSelf: "flex-end",
-    position: "absolute",
-  },
-  settingsIcon: {
-    width: 30,
-    height: 30,
-    position: "absolute",
-    alignSelf: "flex-start",
-    left: 20,
-  },
-  detailsIcon: {
-    width: 30,
-    height: 30,
-    position: "absolute",
-    alignSelf: "flex-start",
-    left: 75,
-  },
-  addIcon: {
-    width: 30,
-    height: 30,
-    position: "absolute",
-    alignSelf: "flex-end",
-    right: 20,
-  },
-  deleteIcon: {
-    width: 30,
-    height: 30,
-    position: "absolute",
-    alignSelf: "flex-end",
-    right: 75,
-  },
-  linkedInIcon: {
-    width: 50,
-    height: 50,
-    marginHorizontal: 5,
-  },
-  githubIcon: {
-    width: 50,
-    height: 50,
-    marginHorizontal: 5,
-  },
-  extraSpace: {
-    marginVertical: "3%",
-  },
-});
