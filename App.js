@@ -18,6 +18,9 @@ import margins from 'app/styling/margins';
 // Components
 import CircularMenuButton from "app/components/buttons/CircularMenuButton";
 
+// Json
+import eventData from "app/json/timeEvents"
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
