@@ -144,8 +144,18 @@ export default styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center"
     },
-    timeSlotText: {
+    timeSlotText12h: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    timeSlotText24h: {
         fontSize: 22,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    timeEventText: {
+        fontSize: 16,
         fontWeight: 'bold',
         color: '#fff',
     },

@@ -5,10 +5,9 @@ import Icon from "@expo/vector-icons/Feather";
 import styles from "app/styling/mainstyles";
 import colors from "app/styling/colors";
 
-function CircularMenuButton(props) {
-
+function CircularMenuButton(buttonProps) {
     return (
-        <IconButton icon={props => <Icon name="settings" size={20} color="white" />} style={props.style} onPress={props.action} />
+        <IconButton icon={props => <Icon name={buttonProps.iconName} size={buttonProps.iconSize} color={buttonProps.iconColor} />} style={buttonProps.style} onPress={buttonProps.action} />
     );
 }
 

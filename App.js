@@ -111,23 +111,27 @@ export default function App() {
   // Settings params
   const [notifications, setNotifications] = useState(false);
   const [lightMode, setLightMode] = useState(false);
+  const [interval, setInterval] = useState("1h");
+  const [clockType, setClockType] = useState("12h");
 
-  const [events, setEvents] = useState([
-    { time: "12:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "1:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "2:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "3:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "4:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "5:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "6:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "7:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "8:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "9:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "10:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "11:00", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-  ]);
+  const [events, setEvents] = useState(
+    eventData._12hr_1h
+    /*{ time: "12:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "1:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "2:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "3:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "4:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "5:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "6:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "7:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "8:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "9:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "10:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
+    { time: "11:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },*/
+  );
 
   useEffect(() => {
+    // Set up Notifications
     registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
@@ -137,6 +141,21 @@ export default function App() {
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       console.log(response);
     });
+
+    var setPM = false;
+    var timeMode = " am";
+
+    // Set background color for default events
+    const newEvents = events.map((item) => {
+      if (item.time === "12:00" && setPM === false) {
+        setPM = true;
+      } else if (item.time === "12:00" && setPM === true) {
+        timeMode = " pm";
+      }
+
+      return { time: item.time + timeMode, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+    });
+    setEvents(newEvents);
 
     return () => {
       Notifications.removeNotificationSubscription(notificationListener.current);
@@ -153,6 +172,50 @@ export default function App() {
       { text: "Yes", onPress: () => clearEvents() },
       { text: "No", onPress: () => console.log("Cancelled event deletion.") },
     ]);
+  }
+
+  const changeEvents = () => {
+    var setPM = false;
+    var timeMode = " am";
+
+    setSettingsModalVisible(false);
+    if (clockType === "12h" && interval === "1h") {
+      var newEvents = eventData._12hr_1h;
+      newEvents = newEvents.map((item) => {
+        if (item.time === "12:00" && setPM === false) {
+          setPM = true;
+        } else if (item.time === "12:00" && setPM === true) {
+          timeMode = " pm";
+        }
+
+        return { time: item.time + timeMode, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+      });
+      setEvents(newEvents);
+    } else if (clockType === "12h" && interval === "30min") {
+      var newEvents = eventData._12hr_30min;
+      newEvents = newEvents.map((item) => {
+        if (item.time === "12:00" && setPM === false) {
+          setPM = true;
+        } else if (item.time === "12:00" && setPM === true) {
+          timeMode = " pm";
+        }
+
+        return { time: item.time + timeMode, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+      });
+      setEvents(newEvents);
+    } else if (clockType === "24h" && interval === "1h") {
+      var newEvents = eventData._24hr_1h;
+      newEvents = newEvents.map((item) => {
+        return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+      });
+      setEvents(newEvents);
+    } else if (clockType === "24h" && interval === "30min") {
+      var newEvents = eventData._24hr_30min;
+      newEvents = newEvents.map((item) => {
+        return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+      });
+      setEvents(newEvents);
+    }
   }
 
   const clearEvents = () => {
@@ -226,10 +289,10 @@ export default function App() {
     <SafeAreaView style={[styles.mainContainer, colors.darkGrey]}>
       <View style={styles.titleContainer}>
         <Text style={styles.titleText}>OneDay</Text>
-        <IconButton icon={props => <Icon name="plus" size={24} color="white" />} style={[styles.addIcon, colors.green]} onPress={() => setAddModalVisible(true)} />
-        <IconButton icon={props => <Icon name="trash-2" size={20} color="white" />} style={[styles.deleteIcon, colors.red]} onPress={deleteEvents} />
-        <CircularMenuButton style={[styles.settingsIcon, colors.grey]} action={() => setSettingsModalVisible(true)} />
-        <IconButton icon={props => <Icon name="menu" size={20} color="white" />} style={[styles.detailsIcon, colors.grey]} onPress={() => setDetailsModalVisible(true)} />
+        <CircularMenuButton iconName={"plus"} iconSize={24} iconColor={"white"} style={[styles.addIcon, colors.green]} action={() => setAddModalVisible(true)} />
+        <CircularMenuButton iconName={"trash-2"} iconSize={20} iconColor={"white"} style={[styles.deleteIcon, colors.red]} action={deleteEvents} />
+        <CircularMenuButton iconName={"settings"} iconSize={20} iconColor={"white"} style={[styles.settingsIcon, colors.grey]} action={() => setSettingsModalVisible(true)} />
+        <CircularMenuButton iconName={"menu"} iconSize={20} iconColor={"white"} style={[styles.detailsIcon, colors.grey]} action={() => setDetailsModalVisible(true)} />
       </View>
 
       <ScrollView>
@@ -237,10 +300,10 @@ export default function App() {
           return (
             <View key={i}>
               <TouchableOpacity onLongPress={() => confirmAddEvent(item.time)} style={styles.slotContainer} key={item.time}>
-                <Text style={styles.timeSlotText}>{item.time}</Text>
+                <Text style={styles.timeSlotText12h}>{item.time}</Text>
               </TouchableOpacity>
               <View style={[styles.emptyEventContainer, item.color]} key={item + " event"}>
-                <Text style={styles.timeSlotText} onLongPress={() => eventSelected(item.time, item.event)}>{item.event}</Text>
+                <Text style={styles.timeEventText} onLongPress={() => eventSelected(item.time, item.event)}>{item.event}</Text>
               </View>
             </View>
           )
@@ -380,13 +443,13 @@ export default function App() {
             <View style={styles.buttonContainerSecondary}>
               <TouchableOpacity
                 style={[styles.clock12HourButton, colors.green]}
-                onPress={() => console.log("Set to 12 hour clock")}
+                onPress={() => setClockType("12h")}
               >
                 <Text style={[styles.buttonText, colors.whiteText]}>12 hour</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.clock24HourButton, colors.green]}
-                onPress={() => console.log("Set to 24 hour clock")}
+                onPress={() => setClockType("24h")}
               >
                 <Text style={[styles.buttonText, colors.whiteText]}>24 hour</Text>
               </TouchableOpacity>
@@ -397,13 +460,13 @@ export default function App() {
             <View style={styles.buttonContainerSecondary}>
               <TouchableOpacity
                 style={[styles.clock12HourButton, colors.green]}
-                onPress={() => console.log("Set to 1 hour intervals")}
+                onPress={() => setInterval("1h")}
               >
                 <Text style={[styles.buttonText, colors.whiteText]}>1 hour</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.clock24HourButton, colors.green]}
-                onPress={() => console.log("Set to 30 minute intervals")}
+                onPress={() => setInterval("30min")}
               >
                 <Text style={[styles.buttonText, colors.whiteText]}>30 min.</Text>
               </TouchableOpacity>
@@ -453,10 +516,10 @@ export default function App() {
           />
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[styles.modalButton, colors.grey]}
-              onPress={() => setSettingsModalVisible(false)}
+              style={[styles.modalButton, colors.green]}
+              onPress={() => changeEvents()}
             >
-              <Text style={[styles.buttonText, colors.whiteText]}>Close</Text>
+              <Text style={[styles.buttonText, colors.whiteText]}>Save</Text>
             </TouchableOpacity>
           </View>
         </View>
