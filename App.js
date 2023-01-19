@@ -18,6 +18,9 @@ import margins from 'app/styling/margins';
 // Components
 import CircularMenuButton from "app/components/buttons/CircularMenuButton";
 
+// Functions
+import generateSchedule from 'app/functions/GenerateSchedule';
+
 // Json
 import eventData from "app/json/timeEvents"
 
@@ -113,21 +116,11 @@ export default function App() {
   const [lightMode, setLightMode] = useState(false);
   const [interval, setInterval] = useState("1h");
   const [clockType, setClockType] = useState("12h");
+  const [dayStartTime, setDayStartTime] = useState("");
+  const [dayEndTime, setDayEndTime] = useState("");
 
   const [events, setEvents] = useState(
     eventData._12hr_1h
-    /*{ time: "12:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "1:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "2:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "3:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "4:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "5:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "6:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "7:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "8:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "9:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "10:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },
-    { time: "11:00" + " pm", event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey },*/
   );
 
   useEffect(() => {
@@ -157,6 +150,9 @@ export default function App() {
     });
     setEvents(newEvents);
 
+    setDayStartTime(newEvents[0].time);
+    setDayEndTime(newEvents[newEvents.length - 1].time);
+
     return () => {
       Notifications.removeNotificationSubscription(notificationListener.current);
       Notifications.removeNotificationSubscription(responseListener.current);
@@ -174,11 +170,19 @@ export default function App() {
     ]);
   }
 
-  const changeEvents = () => {
+  const applySettings = () => {
     var setPM = false;
     var timeMode = " am";
 
-    setSettingsModalVisible(false);
+    // Check for invalid settings
+    if (dayStartTime === dayEndTime) {
+      alert("Invalid start/end time. Please try again.");
+      return;
+    } else {
+      setSettingsModalVisible(false);
+    }
+
+    // Logic for changing time settings
     if (clockType === "12h" && interval === "1h") {
       var newEvents = eventData._12hr_1h;
       newEvents = newEvents.map((item) => {
@@ -216,6 +220,10 @@ export default function App() {
       });
       setEvents(newEvents);
     }
+
+    // set schedule start/end time
+    var newEvents = generateSchedule(events, dayStartTime, dayEndTime);
+    setEvents(newEvents);
   }
 
   const clearEvents = () => {
@@ -481,7 +489,7 @@ export default function App() {
             data={events}
             onSelect={(selectedItem, index) => {
               console.log(selectedItem);
-              setEventStartTime(selectedItem.time);
+              setDayStartTime(selectedItem.time);
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
               // text represented after item is selected
@@ -501,7 +509,7 @@ export default function App() {
             renderDropdownIcon={() => { return <Icon name="chevron-down" size={20} color="white" /> }}
             data={events}
             onSelect={(selectedItem, index) => {
-              //setEventStartTime(selectedItem.time);
+              setDayEndTime(selectedItem.time);
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
               // text represented after item is selected
@@ -517,7 +525,7 @@ export default function App() {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.modalButton, colors.green]}
-              onPress={() => changeEvents()}
+              onPress={() => applySettings()}
             >
               <Text style={[styles.buttonText, colors.whiteText]}>Save</Text>
             </TouchableOpacity>
