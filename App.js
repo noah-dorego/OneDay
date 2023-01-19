@@ -116,6 +116,7 @@ export default function App() {
   const [lightMode, setLightMode] = useState(false);
   const [interval, setInterval] = useState("1h");
   const [clockType, setClockType] = useState("12h");
+  const [timeSetting, setTimeSetting] = useState(eventData._12hr_1h);
   const [dayStartTime, setDayStartTime] = useState("");
   const [dayEndTime, setDayEndTime] = useState("");
 
@@ -135,21 +136,13 @@ export default function App() {
       console.log(response);
     });
 
-    var setPM = false;
-    var timeMode = " am";
-
     // Set background color for default events
     const newEvents = events.map((item) => {
-      if (item.time === "12:00" && setPM === false) {
-        setPM = true;
-      } else if (item.time === "12:00" && setPM === true) {
-        timeMode = " pm";
-      }
-
-      return { time: item.time + timeMode, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+      return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
     });
     setEvents(newEvents);
 
+    setTimeSetting(eventData._12hr_1h);
     setDayStartTime(newEvents[0].time);
     setDayEndTime(newEvents[newEvents.length - 1].time);
 
@@ -170,9 +163,14 @@ export default function App() {
     ]);
   }
 
+  const warnSavingSettings = () => {
+    return Alert.alert("Save new settings?", "Saving new settings will overwrite your current events.", [
+      { text: "Yes", onPress: () => applySettings() },
+      { text: "Cancel" },
+    ]);
+  }
+
   const applySettings = () => {
-    var setPM = false;
-    var timeMode = " am";
 
     // Check for invalid settings
     if (dayStartTime === dayEndTime) {
@@ -182,48 +180,14 @@ export default function App() {
       setSettingsModalVisible(false);
     }
 
-    // Logic for changing time settings
-    if (clockType === "12h" && interval === "1h") {
-      var newEvents = eventData._12hr_1h;
-      newEvents = newEvents.map((item) => {
-        if (item.time === "12:00" && setPM === false) {
-          setPM = true;
-        } else if (item.time === "12:00" && setPM === true) {
-          timeMode = " pm";
-        }
-
-        return { time: item.time + timeMode, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
-      });
-      setEvents(newEvents);
-    } else if (clockType === "12h" && interval === "30min") {
-      var newEvents = eventData._12hr_30min;
-      newEvents = newEvents.map((item) => {
-        if (item.time === "12:00" && setPM === false) {
-          setPM = true;
-        } else if (item.time === "12:00" && setPM === true) {
-          timeMode = " pm";
-        }
-
-        return { time: item.time + timeMode, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
-      });
-      setEvents(newEvents);
-    } else if (clockType === "24h" && interval === "1h") {
-      var newEvents = eventData._24hr_1h;
-      newEvents = newEvents.map((item) => {
-        return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
-      });
-      setEvents(newEvents);
-    } else if (clockType === "24h" && interval === "30min") {
-      var newEvents = eventData._24hr_30min;
-      newEvents = newEvents.map((item) => {
-        return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
-      });
-      setEvents(newEvents);
-    }
-
-    // set schedule start/end time
-    var newEvents = generateSchedule(events, dayStartTime, dayEndTime);
+    // set schedule and start/end time (use consts to set events instead of "events")
+    const newEvents = generateSchedule(timeSetting, dayStartTime, dayEndTime);
     setEvents(newEvents);
+    const finalEvents = newEvents.map((item) => {
+      return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+    });
+    setEvents(finalEvents);
+
   }
 
   const clearEvents = () => {
@@ -349,7 +313,6 @@ export default function App() {
             renderDropdownIcon={() => { return <Icon name="chevron-down" size={20} color="white" /> }}
             data={events}
             onSelect={(selectedItem, index) => {
-              console.log(selectedItem);
               setEventStartTime(selectedItem.time);
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
@@ -451,13 +414,35 @@ export default function App() {
             <View style={styles.buttonContainerSecondary}>
               <TouchableOpacity
                 style={[styles.clock12HourButton, colors.green]}
-                onPress={() => setClockType("12h")}
+                onPress={() => {
+                  setClockType("12h");
+                  if (interval === "1h") {
+                    setTimeSetting(eventData._12hr_1h);
+                    setDayStartTime(eventData._12hr_1h[0].time)
+                    setDayEndTime(eventData._12hr_1h[timeSetting.length - 1].time);
+                  } else {
+                    setTimeSetting(eventData._12hr_30min);
+                    setDayStartTime(eventData._12hr_30min[0].time)
+                    setDayEndTime(eventData._12hr_30min[timeSetting.length - 1].time);
+                  }
+                }}
               >
                 <Text style={[styles.buttonText, colors.whiteText]}>12 hour</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.clock24HourButton, colors.green]}
-                onPress={() => setClockType("24h")}
+                onPress={() => {
+                  setClockType("24h");
+                  if (interval === "1h") {
+                    setTimeSetting(eventData._24hr_1h);
+                    setDayStartTime(eventData._24hr_1h[0].time)
+                    setDayEndTime(eventData._24hr_1h[timeSetting.length - 1].time);
+                  } else {
+                    setTimeSetting(eventData._24hr_30min);
+                    setDayStartTime(eventData._24hr_30min[0].time)
+                    setDayEndTime(eventData._24hr_30min[timeSetting.length - 1].time);
+                  }
+                }}
               >
                 <Text style={[styles.buttonText, colors.whiteText]}>24 hour</Text>
               </TouchableOpacity>
@@ -468,13 +453,35 @@ export default function App() {
             <View style={styles.buttonContainerSecondary}>
               <TouchableOpacity
                 style={[styles.clock12HourButton, colors.green]}
-                onPress={() => setInterval("1h")}
+                onPress={() => {
+                  setInterval("1h");
+                  if (clockType === "12h") {
+                    setTimeSetting(eventData._12hr_1h);
+                    setDayStartTime(eventData._12hr_1h[0].time)
+                    setDayEndTime(eventData._12hr_1h[eventData._12hr_1h.length - 1].time);
+                  } else {
+                    setTimeSetting(eventData._24hr_1h);
+                    setDayStartTime(eventData._24hr_1h[0].time)
+                    setDayEndTime(eventData._24hr_1h[eventData._24hr_1h.length - 1].time);
+                  }
+                }}
               >
                 <Text style={[styles.buttonText, colors.whiteText]}>1 hour</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.clock24HourButton, colors.green]}
-                onPress={() => setInterval("30min")}
+                onPress={() => {
+                  setInterval("30min");
+                  if (clockType === "12h") {
+                    setTimeSetting(eventData._12hr_30min);
+                    setDayStartTime(eventData._12hr_30min[0].time)
+                    setDayEndTime(eventData._12hr_30min[eventData._12hr_30min.length - 1].time);
+                  } else {
+                    setTimeSetting(eventData._24hr_30min);
+                    setDayStartTime(eventData._24hr_30min[0].time)
+                    setDayEndTime(eventData._24hr_30min[eventData._24hr_30min.length - 1].time);
+                  }
+                }}
               >
                 <Text style={[styles.buttonText, colors.whiteText]}>30 min.</Text>
               </TouchableOpacity>
@@ -484,17 +491,16 @@ export default function App() {
           <SelectDropdown
             buttonStyle={styles.timeDropdown}
             buttonTextStyle={styles.whiteBodyText}
-            defaultButtonText="Day Start Time"
+            defaultButtonText={`Start Time:  ${dayStartTime}`}
             renderDropdownIcon={() => { return <Icon name="chevron-down" size={20} color="white" /> }}
-            data={events}
+            data={timeSetting}
             onSelect={(selectedItem, index) => {
-              console.log(selectedItem);
               setDayStartTime(selectedItem.time);
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
               // text represented after item is selected
               // if data array is an array of objects then return selectedItem.property to render after item is selected
-              return "Start Time: " + selectedItem.time
+              return "Start Time: " + dayStartTime
             }}
             rowTextForSelection={(item, index) => {
               // text represented for each item in dropdown
@@ -505,16 +511,16 @@ export default function App() {
           <SelectDropdown
             buttonStyle={styles.timeDropdown}
             buttonTextStyle={styles.whiteBodyText}
-            defaultButtonText="Day End Time"
+            defaultButtonText={`End Time:  ${dayEndTime}`}
             renderDropdownIcon={() => { return <Icon name="chevron-down" size={20} color="white" /> }}
-            data={events}
+            data={timeSetting}
             onSelect={(selectedItem, index) => {
               setDayEndTime(selectedItem.time);
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
               // text represented after item is selected
               // if data array is an array of objects then return selectedItem.property to render after item is selected
-              return "End Time: " + selectedItem.time
+              return "End Time: " + dayEndTime
             }}
             rowTextForSelection={(item, index) => {
               // text represented for each item in dropdown
@@ -525,7 +531,7 @@ export default function App() {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.modalButton, colors.green]}
-              onPress={() => applySettings()}
+              onPress={() => warnSavingSettings()}
             >
               <Text style={[styles.buttonText, colors.whiteText]}>Save</Text>
             </TouchableOpacity>
