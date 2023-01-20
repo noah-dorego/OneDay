@@ -63,7 +63,7 @@ export default styles = StyleSheet.create({
         marginHorizontal: 5,
         elevation: 2,
     },
-    clock12HourButton: {
+    clockSettingLeftButton: {
         width: 80,
         height: 35,
         borderRadius: 30,
@@ -71,7 +71,7 @@ export default styles = StyleSheet.create({
         marginHorizontal: 5,
         elevation: 2,
     },
-    clock24HourButton: {
+    clockSettingRightButton: {
         width: 80,
         height: 35,
         borderRadius: 30,

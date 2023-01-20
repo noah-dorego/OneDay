@@ -102,6 +102,7 @@ export default function App() {
   // Custom event params
   const [currentTime, setCurrentTime] = useState("12:00");
   const [eventStartTime, setEventStartTime] = useState("12:00");
+  const [eventEndTime, setEventEndTime] = useState("");
   const [eventTitle, setEventTitle] = useState(EMPTY_EVENT_PLACEHOLDER);
   const [eventColor, setEventColor] = useState('');
 
@@ -214,15 +215,26 @@ export default function App() {
     console.log("add event for" + time + " at time: " + currentHour + ":" + currentMin);
   }
 
-  const addCustomEvent = (time, newEvent, customColor) => {
+  const addCustomEvent = (time, endTime, newEvent, customColor) => {
+
+    var addFlag = false;
+
     setAddModalVisible(false);
+
     if (newEvent === "") {
       newEvent = EMPTY_EVENT_PLACEHOLDER;
     }
+
     const newEvents = events.map((item) => {
       if (item.time === time) {
+        addFlag = true;
         return { time: item.time, event: newEvent, color: { backgroundColor: customColor } };
-      } else {
+      } else if (addFlag === true && item.time === endTime) {
+        addFlag = false;
+        return { time: item.time, event: newEvent, color: { backgroundColor: customColor } };
+      } else if (addFlag === true) {
+        return { time: item.time, event: newEvent, color: { backgroundColor: customColor } };
+      } else if (addFlag === false) {
         return { time: item.time, event: item.event, color: item.color };
       }
     });
@@ -333,7 +345,7 @@ export default function App() {
             renderDropdownIcon={() => { return <Icon name="chevron-down" size={20} color="white" /> }}
             data={events}
             onSelect={(selectedItem, index) => {
-              //setEventStartTime(selectedItem.time);
+              setEventEndTime(selectedItem.time);
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
               // text represented after item is selected
@@ -361,7 +373,7 @@ export default function App() {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.modalButton, colors.green]}
-              onPress={() => addCustomEvent(eventStartTime, eventTitle, eventColor)}
+              onPress={() => addCustomEvent(eventStartTime, eventEndTime, eventTitle, eventColor)}
             >
               <Text style={[styles.buttonText, colors.whiteText]}>Add</Text>
             </TouchableOpacity>
@@ -413,7 +425,7 @@ export default function App() {
             <Text style={styles.settingText}>Clock Type</Text>
             <View style={styles.buttonContainerSecondary}>
               <TouchableOpacity
-                style={[styles.clock12HourButton, colors.green]}
+                style={clockType === "12h" ? [styles.clockSettingLeftButton, colors.green] : [styles.clockSettingLeftButton, colors.grey]}
                 onPress={() => {
                   setClockType("12h");
                   if (interval === "1h") {
@@ -430,7 +442,7 @@ export default function App() {
                 <Text style={[styles.buttonText, colors.whiteText]}>12 hour</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.clock24HourButton, colors.green]}
+                style={clockType === "24h" ? [styles.clockSettingRightButton, colors.green] : [styles.clockSettingRightButton, colors.grey]}
                 onPress={() => {
                   setClockType("24h");
                   if (interval === "1h") {
@@ -452,7 +464,7 @@ export default function App() {
             <Text style={styles.settingText}>Intervals</Text>
             <View style={styles.buttonContainerSecondary}>
               <TouchableOpacity
-                style={[styles.clock12HourButton, colors.green]}
+                style={interval === "1h" ? [styles.clockSettingLeftButton, colors.green] : [styles.clockSettingLeftButton, colors.grey]}
                 onPress={() => {
                   setInterval("1h");
                   if (clockType === "12h") {
@@ -469,7 +481,7 @@ export default function App() {
                 <Text style={[styles.buttonText, colors.whiteText]}>1 hour</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.clock24HourButton, colors.green]}
+                style={interval === "30min" ? [styles.clockSettingRightButton, colors.green] : [styles.clockSettingRightButton, colors.grey]}
                 onPress={() => {
                   setInterval("30min");
                   if (clockType === "12h") {
