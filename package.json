@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
+    "@react-native-async-storage/async-storage": "^1.17.11",
     "@react-native-material/core": "^1.3.7",
     "expo": "~47.0.9",
+    "expo-device": "~5.0.0",
+    "expo-notifications": "~0.17.0",
     "expo-status-bar": "~1.4.2",
     "react": "18.1.0",
     "react-native": "0.70.5",
@@ -19,9 +22,7 @@
     "react-native-extra-dimensions-android": "^1.2.5",
     "react-native-modal": "^13.0.1",
     "react-native-select-dropdown": "^3.1.0",
-    "react-native-wheel-color-picker": "^1.2.0",
-    "expo-notifications": "~0.17.0",
-    "expo-device": "~5.0.0"
+    "react-native-wheel-color-picker": "^1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

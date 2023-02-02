@@ -5,6 +5,7 @@ import ModalNew from "react-native-modal";
 import Dialog from "react-native-dialog";
 import SelectDropdown from 'react-native-select-dropdown';
 import ColorPicker from 'react-native-wheel-color-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from "@expo/vector-icons/Feather";
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
@@ -121,6 +122,11 @@ export default function App() {
   const [dayStartTime, setDayStartTime] = useState("");
   const [dayEndTime, setDayEndTime] = useState("");
 
+  // Colours
+  var defaultSlotsColor = !lightMode ? colors.grey : colors.lightGrey;
+  var defaultTextColor = !lightMode ? colors.whiteText : colors.blackText;
+  var statusBarStyle = !lightMode ? "light" : "dark";
+
   const [events, setEvents] = useState(
     eventData._12hr_1h
   );
@@ -138,20 +144,61 @@ export default function App() {
     });
 
     // Set background color for default events
+    const savedEvents = getEventData();
     const newEvents = events.map((item) => {
-      return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+      return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: defaultSlotsColor };
     });
     setEvents(newEvents);
 
+    const firstLoad = async () => {
+      try {
+        const savedEvents = await getEventData();
+        if (JSON.stringify(savedEvents) === "{}" || savedEvents === null) {
+          storeEventData(events);
+        } else {
+          console.log(savedEvents);
+          setEvents(savedEvents);
+          storeEventData(savedEvents);
+        }
+      } catch (err) {
+        console.log(err);
+        storeEventData(events);
+      }
+
+    };
+
+    // Set default time mode
     setTimeSetting(eventData._12hr_1h);
     setDayStartTime(newEvents[0].time);
     setDayEndTime(newEvents[newEvents.length - 1].time);
+
+    firstLoad();
 
     return () => {
       Notifications.removeNotificationSubscription(notificationListener.current);
       Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
+
+  // Save data method
+  const storeEventData = async (value) => {
+    try {
+      const jsonValue = JSON.stringify(value)
+      await AsyncStorage.setItem('@saved_events', jsonValue)
+    } catch (e) {
+      // saving error
+    }
+  }
+
+  // Get saved data method
+  const getEventData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@saved_events')
+      return jsonValue != null ? JSON.parse(jsonValue) : null;
+    } catch (e) {
+      // error reading value
+    }
+  }
 
   const onColorChange = eventColor => {
     setEventColor(eventColor);
@@ -185,7 +232,7 @@ export default function App() {
     const newEvents = generateSchedule(timeSetting, dayStartTime, dayEndTime);
     setEvents(newEvents);
     const finalEvents = newEvents.map((item) => {
-      return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+      return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: defaultSlotsColor };
     });
     setEvents(finalEvents);
 
@@ -193,7 +240,7 @@ export default function App() {
 
   const clearEvents = () => {
     const newEvents = events.map((item) => {
-      return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+      return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: defaultSlotsColor };
     });
     setEvents(newEvents);
     console.log("Deleted events.");
@@ -206,16 +253,38 @@ export default function App() {
     }
     const newEvents = events.map((item) => {
       if (item.time === time) {
-        return { time: item.time, event: newEvent, color: colors.grey };
+        return { time: item.time, event: newEvent, color: defaultSlotsColor };
       } else {
         return { time: item.time, event: item.event, color: item.color };
       }
     });
     setEvents(newEvents);
+    storeEventData(newEvents);
     console.log("add event for" + time + " at time: " + currentHour + ":" + currentMin);
   }
 
   const addCustomEvent = (time, endTime, newEvent, customColor) => {
+
+    // Check for invalid settings
+    var invalidFlag, validFlag = false;
+
+    const testEvents = events.map((item) => {
+      if (!invalidFlag && !validFlag) {
+        if (item.time === time) {
+          validFlag = true;
+        }
+        if (item.time === endTime && !validFlag) {
+          invalidFlag = true;
+        }
+      }
+    })
+
+    if (invalidFlag) {
+      alert("Invalid start/end time. Please try again.");
+      return;
+    } else if (validFlag) {
+      setSettingsModalVisible(false);
+    }
 
     var addFlag = false;
 
@@ -226,7 +295,10 @@ export default function App() {
     }
 
     const newEvents = events.map((item) => {
-      if (item.time === time) {
+      if (item.time === time && item.time === endTime) {
+        addFlag = false;
+        return { time: item.time, event: newEvent, color: { backgroundColor: customColor } };
+      } else if (item.time === time) {
         addFlag = true;
         return { time: item.time, event: newEvent, color: { backgroundColor: customColor } };
       } else if (addFlag === true && item.time === endTime) {
@@ -239,11 +311,12 @@ export default function App() {
       }
     });
     setEvents(newEvents);
-    console.log("add event " + time);
+    storeEventData(newEvents);
+    console.log("add event " + time + " " + customColor);
   }
 
   const confirmAddEvent = (time) => {
-    console.log("dialog");
+    console.log("add quick event");
     setCurrentTime(time);
     setAddDialogVisible(true);
   }
@@ -252,12 +325,13 @@ export default function App() {
     setAddDialogVisible(false);
     const newEvents = events.map((item) => {
       if (item.time === time) {
-        return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: colors.grey };
+        return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: defaultSlotsColor };
       } else {
         return { time: item.time, event: item.event, color: item.color };
       }
     });
     setEvents(newEvents);
+    storeEventData(newEvents);
     console.log("remove event " + time);
   }
 
@@ -269,10 +343,65 @@ export default function App() {
     }
   }
 
+  const closeModals = () => {
+    setDetailsModalVisible(false);
+    setAddModalVisible(false);
+    setSettingsModalVisible(false);
+  }
+
+  async function setNotificationsForEvents(events) {
+    events.map(async (item) => {
+      if (item.event !== EMPTY_EVENT_PLACEHOLDER && notifications) {
+        if (clockType === "24h") {
+          var hourT = item.time.split(":")[0];
+          var minuteT = item.time.split(":")[1];
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: item.event,
+              body: 'Current event: ' + item.event,
+            },
+            trigger: {
+              hour: parseInt(hourT),
+              minute: parseInt(minuteT),
+              repeat: repeat
+            }
+          });
+        } else {
+          var hourT = item.time.split(":")[0];
+          if (clockType === "12h") {
+            if (hourT === "12") {
+              hourT === "0";
+            }
+
+            if (item.time.split(" ")[1] === "pm") {
+              hourT = toString(parseInt(hourT) + 12)
+            }
+          }
+          var minuteT = item.time.split(" ")[1] === "pm" ? item.time.split(":")[1].replace(" pm", "") : item.time.split(":")[1].replace(" am", "");
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: item.event,
+              body: 'Current event: ' + item.event,
+            },
+            trigger: {
+              hour: parseInt(hourT),
+              minute: parseInt(minuteT),
+              repeat: repeat
+            }
+          });
+        }
+      }
+    });
+
+    if (!notifications) {
+      Notifications.cancelAllScheduledNotificationsAsync();
+    }
+  }
+
   return (
-    <SafeAreaView style={[styles.mainContainer, colors.darkGrey]}>
+    <SafeAreaView style={!lightMode ? [styles.mainContainer, colors.darkGrey] : [styles.mainContainer, colors.white]}>
       <View style={styles.titleContainer}>
-        <Text style={styles.titleText}>OneDay</Text>
+        <Text style={[styles.titleText, defaultTextColor]}>OneDay</Text>
         <CircularMenuButton iconName={"plus"} iconSize={24} iconColor={"white"} style={[styles.addIcon, colors.green]} action={() => setAddModalVisible(true)} />
         <CircularMenuButton iconName={"trash-2"} iconSize={20} iconColor={"white"} style={[styles.deleteIcon, colors.red]} action={deleteEvents} />
         <CircularMenuButton iconName={"settings"} iconSize={20} iconColor={"white"} style={[styles.settingsIcon, colors.grey]} action={() => setSettingsModalVisible(true)} />
@@ -283,11 +412,11 @@ export default function App() {
         {events.map((item, i) => {
           return (
             <View key={i}>
-              <TouchableOpacity onLongPress={() => confirmAddEvent(item.time)} style={styles.slotContainer} key={item.time}>
-                <Text style={styles.timeSlotText12h}>{item.time}</Text>
+              <TouchableOpacity onPress={() => confirmAddEvent(item.time)} style={[styles.slotContainer, defaultSlotsColor]} key={item.time}>
+                <Text style={[styles.timeSlotText12h, defaultTextColor]}>{item.time}</Text>
               </TouchableOpacity>
-              <View style={[styles.emptyEventContainer, item.color]} key={item + " event"}>
-                <Text style={styles.timeEventText} onLongPress={() => eventSelected(item.time, item.event)}>{item.event}</Text>
+              <View style={[styles.emptyEventContainer, item.color === colors.grey || item.color === colors.lightGrey ? defaultSlotsColor : item.color]} key={item + " event"}>
+                <Text style={[styles.timeEventText, defaultTextColor]} onLongPress={() => eventSelected(item.time, item.event)}>{item.event}</Text>
               </View>
             </View>
           )
@@ -311,6 +440,7 @@ export default function App() {
         style={styles.modalViewContainer}
       >
         <View style={[styles.modalView, colors.white]}>
+          <CircularMenuButton iconName={"x"} iconSize={24} iconColor={"black"} style={styles.closeIcon} action={() => closeModals()} />
           <Text style={styles.modalTitleText}>Add Event</Text>
           <TextInput
             style={styles.textInput}
@@ -361,7 +491,7 @@ export default function App() {
           <View style={styles.colorPicker}>
             <ColorPicker
               color={eventColor}
-              onColorChange={(eventColor) => onColorChange(eventColor)}
+              onColorChangeComplete={(eventColor) => onColorChange(eventColor)}
               thumbSize={30}
               sliderSize={20}
               swatches={true}
@@ -395,6 +525,7 @@ export default function App() {
         style={styles.modalViewContainer}
       >
         <View style={[styles.modalView, colors.white]}>
+          <CircularMenuButton iconName={"x"} iconSize={24} iconColor={"black"} style={styles.closeIcon} action={() => closeModals()} />
           <Text style={styles.modalTitleText}>Settings</Text>
           <View style={styles.settingsContainer}>
             <Text style={styles.settingText}>Notifications</Text>
@@ -417,7 +548,10 @@ export default function App() {
               trackColor={{ false: colors.lightGrey, true: colors.green }}
               thumbColor={"#f4f3f4"}
               ios_backgroundColor="#3e3e3e"
-              onValueChange={setLightMode}
+              onValueChange={() => {
+                setLightMode(!lightMode);
+                defaultSlotsColor = !lightMode ? colors.grey : colors.lightGrey;
+              }}
               value={lightMode}
             />
           </View>
@@ -559,6 +693,7 @@ export default function App() {
         style={styles.modalViewContainer}
       >
         <View style={[styles.modalView, colors.white]}>
+          <CircularMenuButton iconName={"x"} iconSize={24} iconColor={"black"} style={styles.closeIcon} action={() => closeModals()} />
           <Text style={styles.modalTitleText}>Details</Text>
           <Text style={styles.normalText}>
             OneDay is a simple scheduling app that can be used for planning your day, creating reminders and increasing your productivity.
@@ -592,7 +727,7 @@ export default function App() {
         </View>
       </ModalNew>
 
-      <StatusBar style="auto" />
+      <StatusBar style={statusBarStyle} />
     </SafeAreaView>
   );
 }

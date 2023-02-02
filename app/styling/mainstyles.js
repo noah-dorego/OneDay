@@ -128,6 +128,7 @@ export default styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         color: '#000',
+        marginBottom: 20,
     },
     modalSubtitleText: {
         fontSize: 20,
@@ -197,6 +198,14 @@ export default styles = StyleSheet.create({
         position: "absolute",
         alignSelf: "flex-end",
         right: 75,
+    },
+    closeIcon: {
+        width: 30,
+        height: 30,
+        position: "absolute",
+        alignSelf: "flex-end",
+        top: 10,
+        right: 10,
     },
     linkedInIcon: {
         width: 50,
