@@ -36,8 +36,8 @@ Notifications.setNotificationHandler({
 async function schedulePushNotification() {
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: "Event",
-      body: 'Here is the notification body',
+      title: "Test Notification",
+      body: 'Event notifications will be added soon!',
       data: { data: 'goes here' },
     },
     trigger: { seconds: 2 },
@@ -148,13 +148,14 @@ export default function App() {
     const newEvents = events.map((item) => {
       return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: defaultSlotsColor };
     });
-    setEvents(newEvents);
+
 
     const firstLoad = async () => {
       try {
         const savedEvents = await getEventData();
         if (JSON.stringify(savedEvents) === "{}" || savedEvents === null) {
-          storeEventData(events);
+          storeEventData(newEvents);
+          setEvents(newEvents);
         } else {
           console.log(savedEvents);
           setEvents(savedEvents);
@@ -162,7 +163,8 @@ export default function App() {
         }
       } catch (err) {
         console.log(err);
-        storeEventData(events);
+        storeEventData(newEvents);
+        setEvents(newEvents);
       }
 
     };
@@ -243,6 +245,16 @@ export default function App() {
       return { time: item.time, event: EMPTY_EVENT_PLACEHOLDER, color: defaultSlotsColor };
     });
     setEvents(newEvents);
+    storeEventData(newEvents);
+    console.log("Deleted events.");
+  }
+
+  const refreshEvents = () => {
+    const newEvents = events.map((item) => {
+      return { time: item.time, event: item.event, color: defaultSlotsColor };
+    });
+    setEvents(newEvents);
+    storeEventData(newEvents);
     console.log("Deleted events.");
   }
 
@@ -267,17 +279,6 @@ export default function App() {
 
     // Check for invalid settings
     var invalidFlag, validFlag = false;
-
-    const testEvents = events.map((item) => {
-      if (!invalidFlag && !validFlag) {
-        if (item.time === time) {
-          validFlag = true;
-        }
-        if (item.time === endTime && !validFlag) {
-          invalidFlag = true;
-        }
-      }
-    })
 
     if (invalidFlag) {
       alert("Invalid start/end time. Please try again.");
@@ -415,7 +416,7 @@ export default function App() {
               <TouchableOpacity onPress={() => confirmAddEvent(item.time)} style={[styles.slotContainer, defaultSlotsColor]} key={item.time}>
                 <Text style={[styles.timeSlotText12h, defaultTextColor]}>{item.time}</Text>
               </TouchableOpacity>
-              <View style={[styles.emptyEventContainer, item.color === colors.grey || item.color === colors.lightGrey ? defaultSlotsColor : item.color]} key={item + " event"}>
+              <View style={[styles.emptyEventContainer, item.color]} key={item + " event"}>
                 <Text style={[styles.timeEventText, defaultTextColor]} onLongPress={() => eventSelected(item.time, item.event)}>{item.event}</Text>
               </View>
             </View>
@@ -549,8 +550,9 @@ export default function App() {
               thumbColor={"#f4f3f4"}
               ios_backgroundColor="#3e3e3e"
               onValueChange={() => {
+                defaultSlotsColor = lightMode ? colors.grey : colors.lightGrey;
                 setLightMode(!lightMode);
-                defaultSlotsColor = !lightMode ? colors.grey : colors.lightGrey;
+                refreshEvents();
               }}
               value={lightMode}
             />
