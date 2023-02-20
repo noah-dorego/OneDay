@@ -82,12 +82,13 @@ export default function App() {
   const EMPTY_EVENT_PLACEHOLDER = " ";
   //const times = ["12:00", "1:00", "2:00", "3:00", "4:00", "5:00", "6:00", "7:00", "8:00", "9:00", "10:00", "11:00"];
   const deviceWidth = Dimensions.get("window").width;
-  const deviceHeight =
-    Platform.OS === "ios"
-      ? Dimensions.get("window").height
-      : require("react-native-extra-dimensions-android").get(
-        "REAL_WINDOW_HEIGHT"
-      );
+  const deviceHeight = Dimensions.get("window").height;
+
+  // Platform.OS === "ios"
+  //     ? Dimensions.get("window").height
+  //     : require("react-native-extra-dimensions-android").get(
+  //       "REAL_WINDOW_HEIGHT"
+  //     );
 
   const linkedinURL = "https://www.linkedin.com/in/noah-do-rego/";
   const githubURL = "https://github.com/NoahdoRegoUO";
@@ -157,7 +158,6 @@ export default function App() {
           storeEventData(newEvents);
           setEvents(newEvents);
         } else {
-          console.log(savedEvents);
           setEvents(savedEvents);
           storeEventData(savedEvents);
         }

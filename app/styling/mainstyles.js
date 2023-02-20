@@ -37,7 +37,6 @@ export default styles = StyleSheet.create({
     modalView: {
         alignItems: "center",
         margin: 10,
-        flex: "auto",
         flexDirection: "column",
         marginTop: "12%",
         borderRadius: 20,
