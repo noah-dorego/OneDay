@@ -37,10 +37,10 @@ async function schedulePushNotification() {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "Test Notification",
-      body: 'Event notifications will be added soon!',
+      body: 'Event notifications will be added in a later update!',
       data: { data: 'goes here' },
     },
-    trigger: { seconds: 2 },
+    trigger: { seconds: 0.2 },
   });
 }
 
@@ -417,7 +417,7 @@ export default function App() {
                 <Text style={[styles.timeSlotText12h, defaultTextColor]}>{item.time}</Text>
               </TouchableOpacity>
               <View style={[styles.emptyEventContainer, item.color]} key={item + " event"}>
-                <Text style={[styles.timeEventText, defaultTextColor]} onLongPress={() => eventSelected(item.time, item.event)}>{item.event}</Text>
+                <Text style={[styles.timeEventText, defaultTextColor]} onLongPress={() => eventSelected(item.time, item.event)} numberOfLines={1}>{item.event}</Text>
               </View>
             </View>
           )
@@ -429,7 +429,7 @@ export default function App() {
         <Dialog.Description>
           Enter your title below.
         </Dialog.Description>
-        <Dialog.Input value={eventTitle} onChangeText={setEventTitle}></Dialog.Input>
+        <Dialog.Input value={eventTitle} onChangeText={setEventTitle} numberOfLines={1} maxLength={50}></Dialog.Input>
         <Dialog.Button label="Add" onPress={() => addEvent(currentTime, eventTitle)} />
         <Dialog.Button label="Cancel" onPress={() => setAddDialogVisible(false)} />
       </Dialog.Container>
@@ -448,6 +448,8 @@ export default function App() {
             placeholder="Event Title"
             value={eventTitle}
             onChangeText={setEventTitle}
+            numberOfLines={1}
+            maxLength={50}
           />
           <SelectDropdown
             buttonStyle={styles.timeDropdown}
