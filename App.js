@@ -40,7 +40,7 @@ async function schedulePushNotification() {
       body: 'Event notifications will be added in a later update!',
       data: { data: 'goes here' },
     },
-    trigger: { seconds: 0.2 },
+    trigger: { seconds: 1 },
   });
 }
 
@@ -538,8 +538,13 @@ export default function App() {
               thumbColor={"#f4f3f4"}
               ios_backgroundColor="#3e3e3e"
               onValueChange={async () => {
-                await schedulePushNotification();
                 setNotifications();
+                try {
+                  await schedulePushNotification();
+                } catch (e) {
+                  setNotifications(false);
+                }
+
               }}
               value={notifications}
             />

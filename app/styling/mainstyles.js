@@ -111,6 +111,7 @@ export default styles = StyleSheet.create({
     timeDropdown: {
         margin: 5,
         borderRadius: 20,
+        width: "80%",
         backgroundColor: "#4f4f4f",
     },
     titleText: {
