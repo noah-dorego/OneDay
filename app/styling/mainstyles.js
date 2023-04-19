@@ -148,16 +148,26 @@ export default styles = StyleSheet.create({
     timeSlotText12h: {
         fontSize: 16,
         fontWeight: 'bold',
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        maxHeight: 22,
         color: '#fff',
     },
     timeSlotText24h: {
         fontSize: 22,
         fontWeight: 'bold',
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
         color: '#fff',
     },
     timeEventText: {
         fontSize: 16,
         fontWeight: 'bold',
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
         color: '#fff',
     },
     settingText: {

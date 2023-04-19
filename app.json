@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "OneDay",
-    "slug": "OneDay",
+    "name": "OneDay Daily Planner",
+    "slug": "oneday-daily-planner",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/oneday_icon1.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -18,16 +18,25 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.expo.oneday",
+      "buildNumber": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.expo.oneday",
+      "versionCode": 1
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/oneday_icon1.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fa74a749-0dd0-4637-aa3e-8661eabc5853"
+      }
     }
   }
 }
