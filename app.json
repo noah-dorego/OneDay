@@ -2,7 +2,7 @@
   "expo": {
     "name": "OneDay Daily Planner",
     "slug": "oneday-daily-planner",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/oneday_icon1.png",
     "userInterfaceStyle": "light",
