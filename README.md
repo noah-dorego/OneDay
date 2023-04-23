@@ -2,7 +2,7 @@
 
 OneDay is a minimalist, simplified daily planner app that anyone can use.
 
-[NOW ON GOOGLE PLAY](https://play.google.com/store/apps/details?id=com.expo.oneday)
+[Now on Google Play](https://play.google.com/store/apps/details?id=com.expo.oneday)
 
 ## Installation
 
