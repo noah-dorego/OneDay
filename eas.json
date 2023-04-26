@@ -23,6 +23,12 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "noah.dorego@gmail.com",
+        "ascAppId": "6448406495",
+        "appleTeamId": "N54MQW2UTD"
+      }
+    }
   }
 }
