@@ -13,5 +13,5 @@ web-build/
 # macOS
 .DS_Store
 
-eas.json
 app.json
+.env
