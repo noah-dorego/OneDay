@@ -9,7 +9,6 @@ OneDay is a minimalist, simplified daily planner app that anyone can use.
   <img src="https://user-images.githubusercontent.com/90425027/235015535-9d443336-b628-4918-81f2-900c8528b15a.png" width="200" height= "420">
   <img src="https://user-images.githubusercontent.com/90425027/235015542-37a43566-66f8-4bd0-af38-15f4f59d1777.png" width="200" height= "420">
   <img src="https://user-images.githubusercontent.com/90425027/235015551-cd3986db-e516-4706-82ab-b795714a2bb6.png" width="200" height= "420">
-  <img src="https://user-images.githubusercontent.com/90425027/235015560-aab49d82-4c00-407f-b66a-2b87c063ccd3.png" width="200" height= "420">
 </div>
 
 ## Description
