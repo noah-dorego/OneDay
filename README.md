@@ -38,6 +38,10 @@ This command will start the Expo development server, which you can access using 
 
 4. Open the project on your mobile device or emulator: To open the project on your mobile device or emulator, you need to have the Expo app installed. You can download it from the App Store or Google Play Store. Once you have the app installed, open it and scan the QR code that appears in your terminal or command prompt when you run the npm start command.
 
+## More Information
+
+Contact noah.dorego@gmail.com for more information or comments.
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
