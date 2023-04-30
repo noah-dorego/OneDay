@@ -2,7 +2,7 @@
 
 OneDay is a minimalist, simplified daily planner app that anyone can use.
 
-[Available on Google Play](https://play.google.com/store/apps/details?id=com.expo.oneday)
+[Available on Google Play](https://play.google.com/store/apps/details?id=com.expo.oneday) (iOS in progress)
 
 <div align="center" display="flex">
   <img src="https://user-images.githubusercontent.com/90425027/235015522-fb738600-7b2b-4dc6-98a8-845b20510151.png" width="200" height= "420">
@@ -17,9 +17,9 @@ The buttons in the header are used for accessing settings, opening details, dele
 
 To easily add a default event, hold a time slot or an empty event slot. To delete a single event, hold the event.
 
-## Installation
+## Local Installation
 
-1. Clone the project by running the following command in your terminal or command prompt:
+1. Clone the project from [GitHub](https://github.com/NoahdoRegoUO/OneDay/) by running the following command in your terminal or command prompt:
 ```
 git clone <project-url>
 ```
